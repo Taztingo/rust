@@ -12,6 +12,7 @@ fn main() {
     println!("The mean is: {}", calculate_mean(&list));
     println!("The median is: {}", calculate_median(&list));
     println!("The mode is: {}", calculate_mode(&list));
+    println!("The pig latin of {} is {}", "first", pig_latin("first"));
 }
 
 fn calculate_mean(list: &Vec<i32>) -> f32 {
@@ -49,4 +50,24 @@ fn calculate_mode(list: &Vec<i32>) -> i32 {
         }
     }
     mode
+}
+
+fn pig_latin(string: &str) -> String {
+    let mut copy = String::from(string);
+    let firstLetter = copy.remove(0);
+    let secondLetter = copy.chars().next();
+    match secondLetter {
+        None => println!("Error with string!"),
+        Some(x) => {
+            let vowels: [char; 5] = ['a', 'e', 'i', 'o', 'u'];
+            if vowels.contains(&x) {
+                copy.push('-');
+                copy.push(firstLetter);
+                copy.push_str("ay");
+            } else {
+                copy.push(firstLetter);
+            };
+        }
+    }
+    copy
 }
