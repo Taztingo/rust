@@ -7,4 +7,5 @@ fn main() {
         author: String::from("author"),
         content: String::from("content")
     };
+    aggregator::notify(temp);
 }
