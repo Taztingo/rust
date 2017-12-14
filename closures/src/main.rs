@@ -1,5 +1,6 @@
 use std::thread;
 use std::time::Duration;
+use std::collections::HashMap;
 
 fn simulated_expensive_calculation(intensity: u32) -> u32 {
     println!("Calculating slowly...");
@@ -10,20 +11,20 @@ fn simulated_expensive_calculation(intensity: u32) -> u32 {
 fn generate_workout(intensity: u32, random_number: u32) {
     //let expensive_result = 
     //    simulated_expensive_calculation(intensity);
-    let expensive_closure = |num| {
+    let mut expensive_result = Cacher::new(|num| {
         println!("Calculating slowly...");
         thread::sleep(Duration::from_secs(2));
         num
-    };
+    });
     
     if intensity < 25 {
         println!(
             "Today, do {} pushups!",
-            expensive_closure(intensity)
+            expensive_result.value(intensity)
         );
         println!(
             "Next, do {} situps!",
-            expensive_closure(intensity)
+            expensive_result.value(intensity)
         );
     } else {
         if random_number == 3 {
@@ -31,8 +32,37 @@ fn generate_workout(intensity: u32, random_number: u32) {
         } else {
             println!(
                 "Today, run for {} minutes",
-                expensive_closure(intensity)
+                expensive_result.value(intensity)
             );
+        }
+    }
+}
+
+struct Cacher<T>
+    where T: Fn(u32) -> u32
+{
+    calculation: T,
+    values: HashMap<u32, u32>
+}
+
+impl<T> Cacher<T>
+    where T: Fn(u32) -> u32
+{
+    fn new(calculation: T) -> Cacher<T> {
+        Cacher {
+            calculation,
+            values: HashMap::new()
+        }
+    }
+
+    fn value(&mut self, arg: u32) -> u32 {
+        match self.values.get(&arg) {
+            Some(&value) => value,
+            None => {
+                let v = (self.calculation)(arg);
+                self.values.insert(arg, v);
+                v
+            }
         }
     }
 }
