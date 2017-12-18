@@ -1,0 +1,11 @@
+[package]
+name = "adder2"
+version = "0.1.0"
+authors = ["matthew.witkowski"]
+
+[dependencies]
+add-one = { path = "add-one" }
+add-two = { path = "add-two" }
+rand = "0.3.14"
+
+[workspace]
