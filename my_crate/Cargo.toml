@@ -1,0 +1,8 @@
+[package]
+name = "my_crate"
+version = "0.1.0"
+authors = ["matthew.witkowski"]
+license = "MIT"
+description = "A test project"
+
+[dependencies]
