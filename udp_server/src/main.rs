@@ -14,6 +14,28 @@ enum LogLevel {
     Error = 5
 }
 
+impl LogLevel {
+    pub fn new(level: &String) -> Result<LogLevel, ServerError> {
+        if level == "trace" {
+            Ok(LogLevel::Trace)
+        } else if level == "debug" {
+            Ok(LogLevel::Debug)
+        } else if level == "info" {
+            Ok(LogLevel::Info)
+        } else if level == "warning" {
+            Ok(LogLevel::Warning)
+        } else if level == "error" {
+            Ok(LogLevel::Error)
+        } else {
+            Err(ServerError::LogLevelUndefined)
+        }
+    }
+}
+
+enum ServerError {
+    LogLevelUndefined
+}
+
 
 #[macro_use]
 extern crate log;
@@ -58,33 +80,33 @@ impl Server {
     fn parse_message(&mut self, message: String) {
         let parsed_message = MessageParser::new(message);
         if parsed_message.message_type == "server" {
-            self.parse_server_message(parsed_message.message);
+            match self.parse_server_message(parsed_message.message) {
+                Ok(_) => (),
+                Err(error) => println!("{} is an unknown log level!", error)
+            }
         } else if parsed_message.message_type == "log" {
-
+            //We need to check if the log level is high enough
+            //We also need to create the logs here
         }
     }
 
-    fn parse_server_message(&mut self, message: String) {
+    fn parse_server_message(&mut self, message: String) -> Result<(), String> {
         if message == "exit" {
             self.running = false;
-        } else if message == "trace_level" {
-            self.log_level = LogLevel::Trace;
-        } else if message == "debug_level" {
-            self.log_level = LogLevel::Debug;
-        } else if message == "info_level" {
-            self.log_level = LogLevel::Info;
-        } else if message == "warn_level" {
-            self.log_level = LogLevel::Warning;
-        } else if message == "error_level" {
-            self.log_level = LogLevel::Error;
+        } else {
+            match LogLevel::new(&message) {
+                Ok(arg) => self.log_level = arg,
+                Err(error) => return Err(message)
+            }
         }
+        Ok(())
     }
 }
 
 struct MessageParser {
     message_type: String,
     message: String,
-    level: String
+    level: u8
 }
 
 impl MessageParser {
@@ -99,13 +121,13 @@ impl MessageParser {
             None => ""
         };
         let level = match iter.next() {
-            Some(arg) => arg,
-            None => ""
+            Some(arg) => arg.parse().unwrap(),
+            None => 1
         };
         MessageParser {
             message_type: message_type.to_string(),
             message: message.to_string(),
-            level: level.to_string()
+            level: level
         }
     }
 }
