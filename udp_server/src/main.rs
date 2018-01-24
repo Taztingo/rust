@@ -6,6 +6,13 @@ fn main() {
     server.start();
 }
 
+enum LogLevel {
+    Trace = 1,
+    Debug = 2,
+    Info = 3,
+    Warning = 4,
+    Error = 5
+}
 
 
 #[macro_use]
@@ -15,6 +22,7 @@ struct Server {
     running: bool,
     ip: String,
     port: u16,
+    log_level: LogLevel
 }
 
 impl Server {
@@ -22,7 +30,8 @@ impl Server {
         Server {
             running: false,
             ip: ip,
-            port: port
+            port: port,
+            log_level: LogLevel::Trace
         }
     }
 
@@ -47,9 +56,11 @@ impl Server {
     }
 
     fn parse_message(&mut self, message: String) {
-        let log = MessageParser::new(message);
-        if log.message_type == "server" {
-            self.parse_server_message(log.message);
+        let parsed_message = MessageParser::new(message);
+        if parsed_message.message_type == "server" {
+            self.parse_server_message(parsed_message.message);
+        } else if parsed_message.message_type == "log" {
+
         }
     }
 
@@ -57,15 +68,15 @@ impl Server {
         if message == "exit" {
             self.running = false;
         } else if message == "trace_level" {
-
+            self.log_level = LogLevel::Trace;
         } else if message == "debug_level" {
-
+            self.log_level = LogLevel::Debug;
         } else if message == "info_level" {
-
+            self.log_level = LogLevel::Info;
         } else if message == "warn_level" {
-
+            self.log_level = LogLevel::Warning;
         } else if message == "error_level" {
-
+            self.log_level = LogLevel::Error;
         }
     }
 }
