@@ -6,6 +6,7 @@ fn main() {
     server.start();
 }
 
+#[derive(Copy, Clone)]
 enum LogLevel {
     Trace = 1,
     Debug = 2,
@@ -15,7 +16,7 @@ enum LogLevel {
 }
 
 impl LogLevel {
-    pub fn new(level: &String) -> Result<LogLevel, ServerError> {
+    pub fn new(level: &str) -> Result<LogLevel, ServerError> {
         if level == "trace" {
             Ok(LogLevel::Trace)
         } else if level == "debug" {
@@ -85,8 +86,10 @@ impl Server {
                 Err(error) => println!("{} is an unknown log level!", error)
             }
         } else if parsed_message.message_type == "log" {
-            //We need to check if the log level is high enough
-            //We also need to create the logs here
+            let log_level = self.log_level.clone() as u8;
+            if parsed_message.level >= log_level {
+                println!("{}:\t{}", parsed_message.level, parsed_message.message);
+            }
         }
     }
 
@@ -95,8 +98,11 @@ impl Server {
             self.running = false;
         } else {
             match LogLevel::new(&message) {
-                Ok(arg) => self.log_level = arg,
-                Err(error) => return Err(message)
+                Ok(arg) => {
+                    println!("Changing server logging level to {}", message);
+                    self.log_level = arg
+                },
+                Err(_) => return Err(message)
             }
         }
         Ok(())
@@ -121,7 +127,10 @@ impl MessageParser {
             None => ""
         };
         let level = match iter.next() {
-            Some(arg) => arg.parse().unwrap(),
+            Some(arg) => match LogLevel::new(arg) {
+                Ok(arg) => arg as u8,
+                Err(_) => 1
+            },
             None => 1
         };
         MessageParser {
