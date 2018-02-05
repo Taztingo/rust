@@ -28,6 +28,7 @@ fn get_user_input() -> Option<String> {
     io::stdout().flush();
     match io::stdin().read_line(&mut input) {
         Ok(n) => {
+            input.pop();
             Some(input)
         },
         Err(error) => {
@@ -39,11 +40,17 @@ fn get_user_input() -> Option<String> {
 
 fn parse_line(line: &String) {
 
+    parse_command(line, Vec::new());
     //match line {
 
     //};
 }
 
-fn parse_command(command: String, args: Vec<String>) {
-
+fn parse_command(command: &String, args: Vec<String>) {
+    match command {
+        _ => { 
+            println!("{}: command not found", command);
+            io::stdout().flush();
+        }
+    }
 }
