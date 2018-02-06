@@ -111,14 +111,27 @@ fn exit_command() {
     println!("Not yet implemented!");
 }
 
-fn rm_command(filename: &str) {
-    match fs::remove_file(filename) {
-        Ok(_) => {},
-        Err(error) => println!("rm: cannot remove '{}': Is a directory", filename)
-    };
+fn rm_command(filename: &str, args: Vec<&str>) {
+    let action = |file: &str| fs::remove_file(file);
+    if args.len() > 0 {
+        match args[0] {
+            "-r" => {
+                match fs::remove_dir_all(filename) {
+                    Ok(_) => {},
+                    Err(error) => println!("rm: cannot remove '{}': Is a directory", filename)
+                }
+            }
+            _ => {}
+        }
+    } else {
+        match fs::remove_file(filename) {
+            Ok(_) => {},
+            Err(error) => println!("rm: cannot remove '{}': Is a directory", filename)
+        };
+    }
 }
 
-fn parse_command(command: &str, args: Vec<&str>) {
+fn parse_command(command: &str, mut args: Vec<&str>) {
     match command {
         "help" => {
             help_command();
@@ -145,7 +158,7 @@ fn parse_command(command: &str, args: Vec<&str>) {
             exit_command();
         },
         "rm" => {
-            rm_command(args[0]);
+            rm_command(args.remove(0), args);
         }
         _ => { 
             println!("{}: command not found", command);
