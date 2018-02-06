@@ -85,8 +85,12 @@ fn cd_command(path: &str) {
     env::set_current_dir(&new_path).is_ok();
 }
 
-fn mkdir_command(path: &str) {
 
+fn mkdir_command(path: &str) {
+    match fs::create_dir(path) {
+        Ok(_) => {},
+        Err(_) => println!("mkdir: cannot create directory '{}': File exists", path)
+    };
 }
 
 use std::io::Read;
@@ -108,7 +112,10 @@ fn exit_command() {
 }
 
 fn rm_command(filename: &str) {
-    fs::remove_file(filename);
+    match fs::remove_file(filename) {
+        Ok(_) => {},
+        Err(error) => println!("rm: cannot remove '{}': Is a directory", filename)
+    };
 }
 
 fn parse_command(command: &str, args: Vec<&str>) {
